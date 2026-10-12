@@ -2,7 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import stats
+import scipy.stats as sc
 
 
 df = pd.read_csv('mortality_climate.csv')
@@ -12,10 +12,10 @@ df_filtered = df[(df['CD_AGEGROUP'] == '45-64') & (df['season'] == 'winter')].co
 plt.figure(figsize=(10, 6))
 plt.hist(
     df_filtered["MS_NUM_DEATH"],
-    bins=range( # regrouper les stats
+    bins=np.arange( # regrouper les stats
         int(df_filtered["MS_NUM_DEATH"].min()),
         int(df_filtered["MS_NUM_DEATH"].max()) + 2, # +2 car le range ne vas pas jusqu'au dernier donc +1 et encore +1 pour avoir l'interval entier du dernier
-    ),
+    )-0.5,
     edgecolor="black", # sinon ilisible 
 )
 plt.xlabel("Nombre de décès par jour")
@@ -29,22 +29,26 @@ plt.tight_layout()
 # -------------- fit Poisson MS_NUM_DEATH --------------------------------
 # avec max likelihood
 
-x =df_filtered["MS_NUM_DEATH"].values
+x = df_filtered["MS_NUM_DEATH"].dropna().to_numpy()
 n = len(x)
 lam_hat = x.mean()
 
-loi_poisson = stats.poisson.logpmf(x, lam_hat).sum()
+poisson_log_lik = sc.poisson.logpmf(x, lam_hat).sum()
 
 k = np.arange(x.min(), x.max() +1)
 plt.figure(figsize=(10,6))
 plt.hist(x, bins=np.arange(x.min(), x.max() +2) -0.5, density = True, alpha = 0.5, edgecolor = "black", label = "Données")
-
-plt.plot(k, stats.poisson.pmf(k, lam_hat), "o-", color ="tab:blue")
+plt.plot(
+    k,
+    sc.poisson.pmf(k, lam_hat),
+    "o-",
+    color="tab:blue",
+    label=f"Poisson (λ={lam_hat:.2f})",
+)
 plt.xlabel("Nombre de décès par jour")
 plt.ylabel("Densité")
 plt.title("Nombre de décès des 45-64 ans en hivers avec loi de Poisson")
-plt.legend()
-plt.show()
+#plt.show()
 
 """
 Tout d'abord, on émet comme hypothèse que les variables aléatoires $x_{1}, ... x_{n}$ sont indépendantes, et on approxime par une loi de Poisson : $x_{i} ~ Poisson(\lambda)$
@@ -64,6 +68,24 @@ $$ \hat{\lambda} = \bar{x}$$
 
 # -------------- fit Poisson (fin)---------------------------
 # -------------- fit Negative Binomial MS_NUM_DEATH --------------------------------
+
+ajustement = sc.fit(
+    sc.nbinom,
+    x,
+    bounds={"n": (0.01, 1000), "p": (0.001, 0.999)},
+)
+r_hat = ajustement.params.n
+p_hat = ajustement.params.p
+
+plt.plot(
+    k,
+    sc.nbinom.pmf(k, r_hat, p_hat),
+    "s-",
+    color="tab:orange",
+    label=f"Binomiale négative (r={r_hat:.2f}, p={p_hat:.3f})",
+)
+plt.legend()
+plt.title("Ajustement de Poisson et binomiale négative (45-64 ans, hiver)")
 
 # -------------- fit Negative Binomial (fin)---------------------------
 # ------------------------------------ plot ------------------------------------
