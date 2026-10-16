@@ -69,6 +69,7 @@ $$ \hat{\lambda} = \bar{x}$$
 # -------------- fit Poisson (fin)---------------------------
 # -------------- fit Negative Binomial MS_NUM_DEATH --------------------------------
 
+print("test sum logpmf : ", np.sum(sc.nbinom.logpmf(x)))
 ajustement = sc.fit(
     sc.nbinom,
     x,
