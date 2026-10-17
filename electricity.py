@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import statsmodels.api as sm
 
 
 """
@@ -46,3 +47,38 @@ df_reg = df[["Datetime", "Consumption", "Y_lag", "T_lag", "T_lag_sq"]].dropna().
 
 print(df_reg.head())
 print(df_reg.shape)
+
+#
+# Question 2 :
+#
+
+# Séparer les données : training set (premiers 75%) & test set (derniers 25%)
+n_lignes = len(df_reg)
+n_lignes_split = int(0.75 * n_lignes)
+
+training_set = df_reg.iloc[:n_lignes_split].copy() #Lignes 0 à n_lignes_split -1
+test_set = df_reg.iloc[n_lignes_split:].copy() #Lignes n_lignes_split à n_lignes
+
+# Définir les variables pour la régression
+X_training = sm.add_constant(training_set[["Y_lag"]]) #
+y_training = training_set["Y"]
+
+X_test = sm.add_constant(test_set[["Y_lag"]])
+y_test = test_set["Y"]
+
+# Régression linéaire
+model = sm.OLS(y_training, X_training).fit()
+
+print(model.summary())
+y_prediction = model.predict(X_test)
+
+plt.figure(figsize=(14, 5))
+plt.plot(test_set["Datetime"], y_test, label="Actual consumption", alpha=0.8)
+plt.plot(test_set["Datetime"], y_prediction, label="Predicted consumption", alpha=0.8)
+plt.xlabel("Datetime")
+plt.ylabel("Electricity consumption")
+plt.title("Actual vs Predicted Electricity Consumption (Test Set)")
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
