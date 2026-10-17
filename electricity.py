@@ -56,20 +56,22 @@ print(df_reg.shape)
 n_lignes = len(df_reg)
 n_lignes_split = int(0.75 * n_lignes)
 
-training_set = df_reg.iloc[:n_lignes_split].copy() #Lignes 0 à n_lignes_split -1
-test_set = df_reg.iloc[n_lignes_split:].copy() #Lignes n_lignes_split à n_lignes
+training_set = df_reg.iloc[:n_lignes_split].copy() #Lignes de données : 0 à n_lignes_split-1
+test_set = df_reg.iloc[n_lignes_split:].copy() #Lignes de données : n_lignes_split à n_lignes-1
 
 # Définir les variables pour la régression
-X_training = sm.add_constant(training_set[["Y_lag"]]) #
+X_training = sm.add_constant(training_set[["Y_lag"]]) #Ajout de la constante bêta0 pour la régression
 y_training = training_set["Y"]
 
-X_test = sm.add_constant(test_set[["Y_lag"]])
+X_test = sm.add_constant(test_set[["Y_lag"]]) #Ajout de la constante bêta0 pour la régression
 y_test = test_set["Y"]
 
 # Régression linéaire
 model = sm.OLS(y_training, X_training).fit()
 
 print(model.summary())
+
+# Prédiction grâce aux données du training_set
 y_prediction = model.predict(X_test)
 
 plt.figure(figsize=(14, 5))
@@ -82,3 +84,45 @@ plt.legend()
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
+
+
+#
+# Comments : @Titouan
+#
+
+#
+# Question 3 :
+#
+
+# Variables explicatives dont les variables de climat
+features = ["Y_lag", "T_lag", "T_lag_sq"]
+
+# Définir les variables pour la régression
+X_train = sm.add_constant(training_set[features])
+y_train = training_set["Y"]
+
+X_test = sm.add_constant(test_set[features])
+y_test = test_set["Y"]
+
+# Régression linéaire
+model_climate = sm.OLS(y_train, X_train).fit()
+
+print(model_climate.summary())
+
+# Prédiction grâce aux données du training_set
+y_pred_climate = model_climate.predict(X_test)
+
+plt.figure(figsize=(14, 5))
+plt.plot(test_set["Datetime"], y_test, label="Actual consumption", alpha=0.8)
+plt.plot(test_set["Datetime"], y_prediction, label="Predicted consumption", alpha=0.8)
+plt.xlabel("Datetime")
+plt.ylabel("Electricity consumption")
+plt.title("Actual vs Predicted Electricity Consumption (Test Set)")
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+#
+# Comments : @Titouan
+#
