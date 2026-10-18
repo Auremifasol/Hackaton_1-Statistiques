@@ -126,3 +126,37 @@ plt.show()
 #
 # Comments : @Titouan
 #
+
+
+#
+# Question 5 : 
+# **5.5)** For the model including climate variables, 
+# plot the predicted electricity consumption 
+# versus the true consumption on the test set. 
+# Then, produce a second plot focusing only on the first 7 days of the test set.
+#
+plt.figure(figsize=(14, 5))
+plt.plot(test_set["Datetime"], y_test, label="Actual consumption", alpha=0.8)
+plt.plot(test_set["Datetime"], y_prediction, label="Predicted consumption", alpha=0.8)
+plt.xlabel("Datetime")
+plt.ylabel("Electricity consumption")
+plt.title("Actual vs Predicted Electricity Consumption (Test Set)")
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+
+#first 7 days 
+length = 7*24*4
+test_set_first7 = test_set[:length].copy()
+y_test_first7 = y_test[:length].copy()
+y_prediction_first7 = y_prediction[:length].copy()
+plt.figure(figsize=(14, 5))
+plt.plot(test_set_first7["Datetime"], y_test_first7, label="Actual consumption", alpha=0.8)
+plt.plot(test_set_first7["Datetime"], y_prediction_first7, label="Predicted consumption", alpha=0.8)
+plt.xlabel("Datetime")
+plt.ylabel("Electricity consumption")
+plt.title("Actual vs Predicted Electricity Consumption (Test Set)")
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
