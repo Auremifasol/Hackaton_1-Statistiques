@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 import statsmodels.api as sm
 
 
@@ -126,3 +127,34 @@ plt.show()
 #
 # Comments : @Titouan
 #
+
+#
+# Question 4 :
+#
+
+# Modèle sans climat 
+# Erreur entre la vraie consommation et celle prédite 
+erreur_sans = y_test - y_prediction
+
+# Erreur absolue moyenne
+MAE_sans = np.mean(np.abs(erreur_sans))
+
+# Racine de l'erreur quadratique moyenne
+RMSE_sans = np.sqrt (np.mean(erreur_sans**2))
+
+# Modèle avec climat 
+erreur_avec = y_test - y_pred_climate
+MAE_avec = np.mean(np.abs(erreur_avec))
+RMSE_avec = np.sqrt (np.mean(erreur_avec**2))
+
+print ("Sans climat : MAE =", MAE_sans, "RMSE =", RMSE_sans)
+print ("Avec climat : MAE =", MAE_avec, "RMSE =", RMSE_avec)
+
+"""Question : "Does the inclusion of climate variables improve the predictive performance of the model?"
+Réponse : Les valeurs obtenues (arrondi) sont : 
+Sans climat : MAE = 928 et RMSE = 1259
+Avec climat : MAE = 925 et RMSE = 1256
+Les deux erreurs diminuent lorsqu'on regarde avec l'ajout des variables climatiques,
+donc oui ces variables améliorent la performance prédictive du modèle.
+Mais toutefois, cette différence entre les 2 modèles est très faible et ne représente même pas un demi pourcent.
+"""
