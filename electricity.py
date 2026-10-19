@@ -191,3 +191,8 @@ plt.legend()
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
+
+# commentaire : 
+""" Nous pouvons voir que l'estimation est très bonne, les deux courbes sont très proches.  
+Elle marche particulièrement bien sur les montées en consomation mais moins bien sur les pics de consomation du a leur variation entre les jours.  
+"""
