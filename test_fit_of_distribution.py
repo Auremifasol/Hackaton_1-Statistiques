@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as sc
+from scipy.optimize import minimize
 
 
 df = pd.read_csv('mortality_climate.csv')
@@ -35,19 +36,7 @@ lam_hat = x.mean()
 
 poisson_log_lik = sc.poisson.logpmf(x, lam_hat).sum()
 
-k = np.arange(x.min(), x.max() +1)
-plt.figure(figsize=(10,6))
-plt.hist(x, bins=np.arange(x.min(), x.max() +2) -0.5, density = True, alpha = 0.5, edgecolor = "black", label = "Données")
-plt.plot(
-    k,
-    sc.poisson.pmf(k, lam_hat),
-    "o-",
-    color="tab:blue",
-    label=f"Poisson (λ={lam_hat:.2f})",
-)
-plt.xlabel("Nombre de décès par jour")
-plt.ylabel("Densité")
-plt.title("Nombre de décès des 45-64 ans en hivers avec loi de Poisson")
+
 #plt.show()
 
 """
@@ -68,6 +57,8 @@ $$ \hat{\lambda} = \bar{x}$$
 
 # -------------- fit Poisson (fin)---------------------------
 # -------------- fit Negative Binomial MS_NUM_DEATH --------------------------------
+"""observations = df_filtered["MS_NUM_DEATH"].to_numpy(dtype=int)
+mean_deaths = observations.mean()
 
 print("test sum logpmf : ", np.sum(sc.nbinom.logpmf(x)))
 ajustement = sc.fit(
@@ -76,8 +67,45 @@ ajustement = sc.fit(
     bounds={"n": (0.01, 1000), "p": (0.001, 0.999)},
 )
 r_hat = ajustement.params.n
-p_hat = ajustement.params.p
+p_hat = ajustement.params.p"""
 
+def neg_log_lik(params):
+    r, p = params
+    if r <= 0 or p <= 0 or p >= 1:
+        return 1e12
+    return -np.sum(sc.nbinom.logpmf(x, r, p))
+
+# Initialisation par la méthode des moments
+mean_x = lam_hat
+var_x = np.var(x, ddof=1)
+
+p0 = mean_x / var_x
+r0 = (mean_x ** 2) / (var_x - mean_x)
+
+res = minimize(neg_log_lik, [r0, p0], bounds=[(1e-5, None), (1e-5, 1 - 1e-5)])
+r_hat, p_hat = res.x
+nb_log_lik = -res.fun
+
+# -------------- fit Negative Binomial (fin)---------------------------
+# ------------------------------------ plot ------------------------------------
+
+k = np.arange(x.min(), x.max() +1)
+plt.figure(figsize=(10,6))
+plt.xlabel("Nombre de décès par jour")
+plt.ylabel("Densité")
+plt.title("Ajustement de Poisson et binomiale négative (45-64 ans, hiver)")
+# histograms
+plt.hist(x, bins=np.arange(x.min(), x.max() +2) -0.5, density = True, alpha = 0.5, edgecolor = "black", label = "Données")
+# fitted probability mass function Poisson
+plt.plot(
+    k,
+    sc.poisson.pmf(k, lam_hat),
+    "o-",
+    color="tab:blue",
+    label=f"Poisson (λ={lam_hat:.2f})",
+)
+
+# fitted probability mass function Negative Binomial
 plt.plot(
     k,
     sc.nbinom.pmf(k, r_hat, p_hat),
@@ -86,15 +114,7 @@ plt.plot(
     label=f"Binomiale négative (r={r_hat:.2f}, p={p_hat:.3f})",
 )
 plt.legend()
-plt.title("Ajustement de Poisson et binomiale négative (45-64 ans, hiver)")
-
-# -------------- fit Negative Binomial (fin)---------------------------
 # ------------------------------------ plot ------------------------------------
-# histograms
-# fitted probability mass function Poisson
-# fitted probability mass function Negative Binomial
-# ------------------------------------ plot ------------------------------------
-
 # -------------------- compare log likelihood ----------------------------------
 # and select the most apropriate
 
