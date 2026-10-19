@@ -57,23 +57,11 @@ $$ \hat{\lambda} = \bar{x}$$
 
 # -------------- fit Poisson (fin)---------------------------
 # -------------- fit Negative Binomial MS_NUM_DEATH --------------------------------
-"""observations = df_filtered["MS_NUM_DEATH"].to_numpy(dtype=int)
-mean_deaths = observations.mean()
-
-print("test sum logpmf : ", np.sum(sc.nbinom.logpmf(x)))
-ajustement = sc.fit(
-    sc.nbinom,
-    x,
-    bounds={"n": (0.01, 1000), "p": (0.001, 0.999)},
-)
-r_hat = ajustement.params.n
-p_hat = ajustement.params.p"""
-
-def neg_log_lik(params):
+def neg_log_likelihood(params): # négatif car on veut maximiser la log-vraisemblance, mais la fonction minimize cherche à minimiser
     r, p = params
     if r <= 0 or p <= 0 or p >= 1:
         return 1e12
-    return -np.sum(sc.nbinom.logpmf(x, r, p))
+    return -np.sum(sc.nbinom.logpmf(x, r, p)) 
 
 # Initialisation par la méthode des moments
 mean_x = lam_hat
@@ -82,8 +70,8 @@ var_x = np.var(x, ddof=1)
 p0 = mean_x / var_x
 r0 = (mean_x ** 2) / (var_x - mean_x)
 
-res = minimize(neg_log_lik, [r0, p0], bounds=[(1e-5, None), (1e-5, 1 - 1e-5)])
-r_hat, p_hat = res.x
+res = minimize(neg_log_likelihood, [r0, p0], bounds=[(1e-5, None), (1e-5, 1 - 1e-5)])
+r_hat, p_hat = res.x # on récup les valeurs
 nb_log_lik = -res.fun
 
 # -------------- fit Negative Binomial (fin)---------------------------
