@@ -75,20 +75,22 @@ print(model.summary())
 # Prédiction grâce aux données du training_set
 y_prediction = model.predict(X_test)
 
-plt.figure(figsize=(14, 5))
-plt.plot(test_set["Datetime"], y_test, label="Actual consumption", alpha=0.8)
-plt.plot(test_set["Datetime"], y_prediction, label="Predicted consumption", alpha=0.8)
-plt.xlabel("Datetime")
-plt.ylabel("Electricity consumption")
-plt.title("Actual vs Predicted Electricity Consumption (Test Set)")
-plt.legend()
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
-
 
 #
-# Comments : @Titouan
+# Comments : 
+"""Comments:
+* Analyse de la sortie de la régression :  
+-> La régression peut s'écrire de la forme : estimateur(Y_t) = 1368.6576 + 0.8342*Y_lag = bêta0 + bêta1*Y_lag  
+-> Nous remarquons que les 2 coefficients sont tous les deux positifs. Nous aurons d'une part tendance à avoir une valeur de Y_t grande et positive. Et d'autre part, la valeur de Y_t augmente au plus Y_lag augmente.  
+* Signification statistique :
+-> Nous pouvons observer que les 2 p-valeur associées aux tests d'hypothèse des coefficients bêta :  
+H0 : bêta0 = 0 et H0 : bêta1 = 0,  
+sont fortement petites (de l'ordre < 0.001). Dès lors, il est peu probable que bêta0 et bêta1 soient non-significatif. Nous pouvons donc rejeter l'hypothèse nulle.  
+-> Dans le cas du test de Fisher qui effectue le test d'hypothèse associé aux 2 coefficients bêta en même temps :  
+H0 : bêta0 = bêta1 = 0,  
+nous observons à nouveau qu'il serait très peu probable que notre modèle soit non-significatif car la p-valeur est de l'ordre < 0.001. Nous pouvons donc rejeter l'hypothèse nulle.
+* Performance du modèle :  
+-> Pour notre régression, nous observons que R²= 68.8%, ce qui signifie que 68.8% de la variation de Y est expliqué par le modèle et que 31.2% ne sont pas explicable par celui-ci. Idem pour R² ajusté qui prend en compte le nombre de variables explicatives et le nombre d'observations et qui pourtant vaut 68.8% également."""
 #
 
 #
@@ -113,19 +115,14 @@ print(model_climate.summary())
 # Prédiction grâce aux données du training_set
 y_pred_climate = model_climate.predict(X_test)
 
-plt.figure(figsize=(14, 5))
-plt.plot(test_set["Datetime"], y_test, label="Actual consumption", alpha=0.8)
-plt.plot(test_set["Datetime"], y_prediction, label="Predicted consumption", alpha=0.8)
-plt.xlabel("Datetime")
-plt.ylabel("Electricity consumption")
-plt.title("Actual vs Predicted Electricity Consumption (Test Set)")
-plt.legend()
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
-
 #
-# Comments : @Titouan
+# Comments : 
+"""Comments:  
+* Sortie de la régression : estimateur(Y_t) = 1289.4140 + 0.8354*Y_lag + 23.4912*T_lag - 1.1978*T_lag_sq = bêta0 + bêta1*Y_lag + bêta2*T_lag + bêta3*T_lag_sq  
+* Signification statistique :  
+-> Nous observations que les tests d'hypothèses de toutes les variables explicatives :  
+H0 : bêta0 = 0; H0 : bêta1 = 0; H0 : bêta2 = 0; H0 : bêta3 = 0,  
+résultent en des p-valeurs d'ordre < 0.001. Dès lors, toutes ces variables utilisées pour prévoir la consommation d'électricité 7 jours à l'avance sont significatives. Nous pouvons rejeter l'hypothèse nulle de chacun de ces coefficients."""
 #
 
 #
@@ -194,5 +191,5 @@ plt.show()
 
 # commentaire : 
 """ Nous pouvons voir que l'estimation est très bonne, les deux courbes sont très proches.  
-Elle marche particulièrement bien sur les montées en consomation mais moins bien sur les pics de consomation du a leur variation entre les jours.  
+Elle marche particulièrement bien sur les montées en consommation mais moins bien sur les pics de consommation dû a leur variation entre les jours.  
 """
